@@ -4,12 +4,12 @@
 # Distributed under the terms of the Modified BSD License.
 
 import struct
-from typing import List
+from typing import List, Union
 
 import zmq
 from zmq._typing import TypedDict
 from zmq.error import _check_version
-
+import asyncio
 
 class _MonitorMessage(TypedDict):
     event: int
@@ -53,8 +53,7 @@ def parse_monitor_message(msg: List[bytes]) -> _MonitorMessage:
     }
     return event
 
-
-async def recv_monitor_message_async(socket, flags=0):
+async def recv_monitor_message_async(socket: zmq.Socket, flags: int = 0) -> asyncio.Future:
     """Receive and decode the given raw message from the monitoring socket and return a dict.
 
     Requires libzmq ≥ 4.0
@@ -85,7 +84,7 @@ async def recv_monitor_message_async(socket, flags=0):
     return parse_monitor_message(msg)
 
 
-def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> _MonitorMessage:
+def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> Union[_MonitorMessage,asyncio.Future]:
     """Receive and decode the given raw message from the monitoring socket and return a dict.
 
     Requires libzmq ≥ 4.0
@@ -107,6 +106,11 @@ def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> _MonitorMessage:
     event : dict
         event description as dict with the keys `event`, `value`, and `endpoint`.
     """
+    
+    #transparently handle asyncio socket, jsut return a future instead of a dict
+    if isinstance(socket.context, zmq.asyncio.Context):
+        return recv_monitor_message_async(socket, flags)
+    
     _check_version((4, 0), 'libzmq event API')
     # will always return a list
     msg = socket.recv_multipart(flags)
@@ -114,4 +118,4 @@ def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> _MonitorMessage:
     return parse_monitor_message(msg)
 
 
-__all__ = ['parse_monitor_message', 'recv_monitor_message', 'recv_monitor_message_async']
+__all__ = ['parse_monitor_message', 'recv_monitor_message']
