@@ -19,6 +19,11 @@ class _MonitorMessage(TypedDict):
 
 def parse_monitor_message(msg: List[bytes]) -> _MonitorMessage:
     """decode zmq_monitor event messages.
+    
+    If you are getting error of:
+        'TypeError: object of type '_asyncio.Future' has no len()'
+        'RuntimeError: There is no current event loop in thread 'Thread-1'
+    then use the async monitor
 
     Parameters
     ----------
@@ -54,9 +59,7 @@ async def recv_monitor_message_async(socket, flags=0):
 
     Requires libzmq ≥ 4.0
 
-    returns Future.
-    
-    Future result is: dict will have the following entries:
+    dict will have the following entries:
       event     : int, the event id as described in libzmq.zmq_socket_monitor
       value     : int, the event value associated with the event, see libzmq.zmq_socket_monitor
       endpoint  : string, the affected endpoint
@@ -70,8 +73,10 @@ async def recv_monitor_message_async(socket, flags=0):
 
     Returns
     -------
-    event : dict
+    
+    future_event: an instance of asyncio.Future, the result of Future would have: 
         event description as dict with the keys `event`, `value`, and `endpoint`.
+        
     """
     _check_version((4, 0), 'libzmq event API')
     # will always return a list
