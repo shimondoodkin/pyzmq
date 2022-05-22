@@ -17,3 +17,6 @@ Functions
 
 
 .. autofunction:: zmq.utils.monitor.recv_monitor_message
+
+
+.. autofunction:: zmq.utils.monitor.recv_monitor_message_async
