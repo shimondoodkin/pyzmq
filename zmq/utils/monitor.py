@@ -105,6 +105,8 @@ def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> Union[_MonitorMe
     -------
     event : dict
         event description as dict with the keys `event`, `value`, and `endpoint`.
+
+    if socket.context is of zmq.asyncio.Context type, return asyncio.Future
     """
     
     #transparently handle asyncio socket, jsut return a future instead of a dict
