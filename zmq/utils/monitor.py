@@ -49,6 +49,37 @@ def parse_monitor_message(msg: List[bytes]) -> _MonitorMessage:
     return event
 
 
+async def recv_monitor_message_async(socket, flags=0):
+    """Receive and decode the given raw message from the monitoring socket and return a dict.
+
+    Requires libzmq ≥ 4.0
+
+    returns Future.
+    
+    Future result is: dict will have the following entries:
+      event     : int, the event id as described in libzmq.zmq_socket_monitor
+      value     : int, the event value associated with the event, see libzmq.zmq_socket_monitor
+      endpoint  : string, the affected endpoint
+
+    Parameters
+    ----------
+    socket : zmq PAIR socket
+        The PAIR socket (created by other.get_monitor_socket()) on which to recv the message
+    flags : bitfield (int)
+        standard zmq recv flags
+
+    Returns
+    -------
+    event : dict
+        event description as dict with the keys `event`, `value`, and `endpoint`.
+    """
+    _check_version((4, 0), 'libzmq event API')
+    # will always return a list
+    msg = await socket.recv_multipart(flags)
+    # 4.0-style event API
+    return parse_monitor_message(msg)
+
+
 def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> _MonitorMessage:
     """Receive and decode the given raw message from the monitoring socket and return a dict.
 
@@ -78,4 +109,4 @@ def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> _MonitorMessage:
     return parse_monitor_message(msg)
 
 
-__all__ = ['parse_monitor_message', 'recv_monitor_message']
+__all__ = ['parse_monitor_message', 'recv_monitor_message', 'recv_monitor_message_async']
