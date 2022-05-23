@@ -24,11 +24,6 @@ class _MonitorMessage(TypedDict):
 def parse_monitor_message(msg: List[bytes]) -> _MonitorMessage:
     """decode zmq_monitor event messages.
 
-    If you are getting error of:
-        'TypeError: object of type '_asyncio.Future' has no len()'
-        'RuntimeError: There is no current event loop in thread 'Thread-1'
-    then use the async monitor
-
     Parameters
     ----------
     msg : list(bytes)
