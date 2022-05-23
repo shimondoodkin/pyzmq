@@ -116,7 +116,8 @@ def recv_monitor_message(socket: zmq.Socket, flags: int = 0) -> _MonitorMessage:
     if socket.context is of zmq.asyncio.Context type, return asyncio.Future
     """
 
-    # transparently handle asyncio socket, jsut return a future instead of a dict
+    # transparently handle asyncio socket,
+    # returns a future instead of a dict
     if isinstance(socket.context, zmq.asyncio.Context):
         return recv_monitor_message_async(socket, flags)  # type: ignore
 
